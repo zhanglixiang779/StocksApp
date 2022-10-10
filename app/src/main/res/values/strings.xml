@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">StocksApp</string>
+    <string name="empty_content">No stocks available at this moment!</string>
+    <string name="error_content">Something went wrong!</string>
+    <string name="symbol">Symbol:&#160;</string>
+    <string name="name">Name:&#160;</string>
+    <string name="price">Price:&#160;</string>
+    <string name="quantity">Quantity:&#160;</string>
+</resources>
