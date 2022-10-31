@@ -1,27 +1,34 @@
 package com.example.stocksapp.presentation.composables
 
+import android.os.Bundle
+import android.os.Parcelable
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.google.gson.Gson
+import kotlinx.parcelize.Parcelize
 
-sealed class StocksButton(val content: String) {
-    object SuccessButton : StocksButton("Success")
+@Parcelize
+enum class StocksButton(val content: String) : Parcelable {
 
-    object EmptyButton : StocksButton("Empty")
+    SuccessButton("Success"),
+    EmptyButton("Empty"),
+    ErrorButton("Error");
 
-    object ErrorButton : StocksButton("Error")
+    companion object ButtonType : NavType<StocksButton>(isNullableAllowed = false) {
+        override fun get(bundle: Bundle, key: String): StocksButton? {
+            return bundle.getParcelable(key)
+        }
 
-    companion object {
+        override fun parseValue(value: String): StocksButton {
+            return Gson().fromJson(value, StocksButton::class.java)
+        }
 
-        fun getButtonType(content: String): StocksButton {
-            if (content == "Success") return SuccessButton
-            if (content == "Empty") return EmptyButton
-            if (content == "Error") return ErrorButton
-
-            return SuccessButton
+        override fun put(bundle: Bundle, key: String, value: StocksButton) {
+            bundle.putParcelable(key, value)
         }
     }
 }
@@ -30,24 +37,25 @@ enum class Destination {
     Main, Stocks
 }
 
-private const val BUTTON_TYPE_KEY = "button_type"
+private const val BUTTON_TYPE_KEY = "button_type_key"
 
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "${Destination.Main.name}/{$BUTTON_TYPE_KEY}") {
-        composable(
-            route = "${Destination.Main.name}/{$BUTTON_TYPE_KEY}",
-            arguments = listOf(navArgument(BUTTON_TYPE_KEY) { type = NavType.StringType })
-        ) {
+    NavHost(navController = navController, startDestination = Destination.Main.name) {
+        composable(route = Destination.Main.name) {
             MainScreen { button ->
-                navController.navigate("${Destination.Stocks.name}/${button.content}")
+                navController.navigate("${Destination.Stocks.name}/${button}")
             }
         }
 
-        composable("${Destination.Stocks.name}/{$BUTTON_TYPE_KEY}") { backStackEntry ->
+        composable(
+            route = "${Destination.Stocks.name}/{$BUTTON_TYPE_KEY}",
+            arguments = listOf(navArgument(BUTTON_TYPE_KEY) { type = StocksButton.ButtonType })
+        ) { backStackEntry ->
             StocksScreen(
-                button = backStackEntry.arguments?.getString(BUTTON_TYPE_KEY) ?: StocksButton.SuccessButton.content
+                buttonType = backStackEntry.arguments?.getParcelable(BUTTON_TYPE_KEY)
+                    ?: StocksButton.SuccessButton
             )
         }
     }

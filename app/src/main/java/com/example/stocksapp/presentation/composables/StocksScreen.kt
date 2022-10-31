@@ -17,7 +17,7 @@ import com.example.stocksapp.presentation.StocksViewModel
 @Composable
 fun StocksScreen(
     viewModel: StocksViewModel = hiltViewModel(),
-    button: String
+    buttonType: StocksButton
 ) {
     var shouldShowIndicator by remember {
         mutableStateOf(false)
@@ -26,7 +26,7 @@ fun StocksScreen(
     remember {
         val stocks = viewModel.stocks.value.data?.stocks
         if (stocks?.isEmpty() == true) {
-            viewModel.fetchStocks(StocksButton.getButtonType(button))
+            viewModel.fetchStocks(buttonType)
         }
     }
 
