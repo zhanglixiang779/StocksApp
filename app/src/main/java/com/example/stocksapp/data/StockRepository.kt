@@ -32,7 +32,7 @@ open class StockRepository @Inject constructor(
         return request { remoteDataSource.getErrorStocks() }
     }
 
-    private suspend fun request(apiCall: suspend () -> Response<ApiStocks>): StateFlow<NetworkResult<ApiStocks>> {
+    private fun request(apiCall: suspend () -> Response<ApiStocks>): StateFlow<NetworkResult<ApiStocks>> {
         return flow {
             emit(safeApiCall { apiCall() })
         }.flowOn(Dispatchers.IO)

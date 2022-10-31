@@ -1,6 +1,7 @@
 package com.example.stocksapp.presentation.composables
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,7 +24,7 @@ fun StocksScreen(
         mutableStateOf(false)
     }
 
-    remember {
+    LaunchedEffect(viewModel) {
         val stocks = viewModel.stocks.value.data?.stocks
         if (stocks?.isEmpty() == true) {
             viewModel.fetchStocks(buttonType)
