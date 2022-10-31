@@ -4,12 +4,18 @@ import com.example.stocksapp.data.NetworkResult
 import com.example.stocksapp.data.models.ApiStocks
 import com.example.stocksapp.data.models.Stock
 import com.example.stocksapp.domain.Repository
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
 
 class FakeStockRepository : Repository {
 
-    override fun getStocks(): Flow<NetworkResult<ApiStocks>> {
+    override suspend fun getStocks(): StateFlow<NetworkResult<ApiStocks>> {
         val fakeStocks = listOf(
             Stock(
                 ticker = "TWTR",
@@ -30,19 +36,34 @@ class FakeStockRepository : Repository {
         )
         return flow {
             emit(NetworkResult.Success(ApiStocks(fakeStocks)))
-        }
+        }.flowOn(Dispatchers.IO)
+            .stateIn(
+                scope = CoroutineScope(Job()),
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = NetworkResult.Loading()
+            )
     }
 
-    override fun getEmptyStocks(): Flow<NetworkResult<ApiStocks>> {
+    override suspend fun getEmptyStocks(): StateFlow<NetworkResult<ApiStocks>> {
         val emptyStock = emptyList<Stock>()
         return flow {
             emit(NetworkResult.Success(ApiStocks(emptyStock)))
-        }
+        }.flowOn(Dispatchers.IO)
+            .stateIn(
+                scope = CoroutineScope(Job()),
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = NetworkResult.Loading()
+            )
     }
 
-    override fun getErrorStocks(): Flow<NetworkResult<ApiStocks>> {
+    override suspend fun getErrorStocks(): StateFlow<NetworkResult<ApiStocks>> {
         return flow {
             emit(NetworkResult.Error("something went wrong", null))
-        }
+        }.flowOn(Dispatchers.IO)
+            .stateIn(
+                scope = CoroutineScope(Job()),
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = NetworkResult.Loading()
+            )
     }
 }

@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.stocksapp.data.NetworkResult.Loading
@@ -14,11 +15,22 @@ import com.example.stocksapp.presentation.StocksViewModel
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
-fun StocksScreen(viewModel: StocksViewModel) {
+fun StocksScreen(
+    viewModel: StocksViewModel = hiltViewModel(),
+    button: String
+) {
     var shouldShowIndicator by remember {
         mutableStateOf(false)
     }
-    when (val state = viewModel.stocks.collectAsStateWithLifecycle(initialValue = Loading()).value) {
+
+    remember {
+        val stocks = viewModel.stocks.value.data?.stocks
+        if (stocks?.isEmpty() == true) {
+            viewModel.fetchStocks(StocksButton.getButtonType(button))
+        }
+    }
+
+    when (val state = viewModel.stocks.collectAsStateWithLifecycle().value) {
         is Success -> {
             val apiStocks = state.data
             if (apiStocks != null && apiStocks.stocks.isNotEmpty()) {

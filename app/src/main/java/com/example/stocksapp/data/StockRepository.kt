@@ -6,11 +6,11 @@ import com.example.stocksapp.domain.Repository
 import dagger.hilt.android.scopes.ActivityRetainedScoped
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -20,26 +20,26 @@ open class StockRepository @Inject constructor(
     private val externalScope: CoroutineScope
 ) : Repository {
 
-    override fun getStocks(): Flow<NetworkResult<ApiStocks>> {
+    override suspend fun getStocks(): StateFlow<NetworkResult<ApiStocks>> {
         return request { remoteDataSource.getStocks() }
     }
 
-    override fun getEmptyStocks(): Flow<NetworkResult<ApiStocks>> {
+    override suspend fun getEmptyStocks(): StateFlow<NetworkResult<ApiStocks>> {
         return request { remoteDataSource.getEmptyStocks() }
     }
 
-    override fun getErrorStocks(): Flow<NetworkResult<ApiStocks>> {
+    override suspend fun getErrorStocks(): StateFlow<NetworkResult<ApiStocks>> {
         return request { remoteDataSource.getErrorStocks() }
     }
 
-    private fun request(apiCall: suspend () -> Response<ApiStocks>): Flow<NetworkResult<ApiStocks>> {
+    private suspend fun request(apiCall: suspend () -> Response<ApiStocks>): StateFlow<NetworkResult<ApiStocks>> {
         return flow {
             emit(safeApiCall { apiCall() })
         }.flowOn(Dispatchers.IO)
-            .shareIn(
+            .stateIn(
                 scope = externalScope,
                 started = SharingStarted.WhileSubscribed(),
-                replay = 1
+                initialValue = NetworkResult.Loading()
             )
     }
 }
