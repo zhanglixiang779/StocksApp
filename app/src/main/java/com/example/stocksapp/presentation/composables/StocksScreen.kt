@@ -25,8 +25,7 @@ fun StocksScreen(
     }
 
     LaunchedEffect(viewModel) {
-        val stocks = viewModel.stocks.value.data?.stocks
-        if (stocks?.isEmpty() == true) {
+        if (viewModel.stocks.value is Loading) {
             viewModel.fetchStocks(buttonType)
         }
     }

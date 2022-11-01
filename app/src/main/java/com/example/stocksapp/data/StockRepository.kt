@@ -16,30 +16,18 @@ import javax.inject.Inject
 
 @ActivityRetainedScoped
 open class StockRepository @Inject constructor(
-    private val remoteDataSource: RemoteDataSource,
-    private val externalScope: CoroutineScope
+    private val remoteDataSource: RemoteDataSource
 ) : Repository {
 
-    override suspend fun getStocks(): StateFlow<NetworkResult<ApiStocks>> {
-        return request { remoteDataSource.getStocks() }
+    override suspend fun getStocks(): NetworkResult<ApiStocks> {
+        return safeApiCall { remoteDataSource.getStocks() }
     }
 
-    override suspend fun getEmptyStocks(): StateFlow<NetworkResult<ApiStocks>> {
-        return request { remoteDataSource.getEmptyStocks() }
+    override suspend fun getEmptyStocks(): NetworkResult<ApiStocks> {
+        return safeApiCall { remoteDataSource.getEmptyStocks() }
     }
 
-    override suspend fun getErrorStocks(): StateFlow<NetworkResult<ApiStocks>> {
-        return request { remoteDataSource.getErrorStocks() }
-    }
-
-    private fun request(apiCall: suspend () -> Response<ApiStocks>): StateFlow<NetworkResult<ApiStocks>> {
-        return flow {
-            emit(safeApiCall { apiCall() })
-        }.flowOn(Dispatchers.IO)
-            .stateIn(
-                scope = externalScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = NetworkResult.Loading()
-            )
+    override suspend fun getErrorStocks(): NetworkResult<ApiStocks> {
+        return safeApiCall { remoteDataSource.getErrorStocks() }
     }
 }

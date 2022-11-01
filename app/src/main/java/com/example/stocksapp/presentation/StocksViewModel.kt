@@ -21,7 +21,7 @@ class StocksViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _stocks: MutableStateFlow<NetworkResult<ApiStocks>>
-        = MutableStateFlow(NetworkResult.Success(ApiStocks(emptyList())))
+        = MutableStateFlow(NetworkResult.Loading())
 
     val stocks: StateFlow<NetworkResult<ApiStocks>> = _stocks
 
@@ -29,19 +29,13 @@ class StocksViewModel @Inject constructor(
         viewModelScope.launch {
             when(button) {
                 EmptyButton -> {
-                    repository.getEmptyStocks().collect { emptyStocks ->
-                        _stocks.value = emptyStocks
-                    }
+                    _stocks.value = repository.getEmptyStocks()
                 }
                 ErrorButton -> {
-                    repository.getErrorStocks().collect { errorStock ->
-                        _stocks.value = errorStock
-                    }
+                    _stocks.value = repository.getErrorStocks()
                 }
                 SuccessButton -> {
-                    repository.getStocks().collect { stocks ->
-                        _stocks.value = stocks
-                    }
+                    _stocks.value = repository.getStocks()
                 }
             }
         }

@@ -7,15 +7,9 @@ import com.example.stocksapp.data.models.Stock
 import com.example.stocksapp.fake.FakeStockRepository
 import com.example.stocksapp.presentation.StocksViewModel
 import com.example.stocksapp.presentation.composables.StocksButton
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -76,21 +70,14 @@ class MockStocksViewModelTest {
             )
 
             `when`(mockStockRepository.getStocks()).thenReturn(
-                flow {
-                    emit(NetworkResult.Success(ApiStocks(stocks)))
-                }.flowOn(Dispatchers.IO)
-                    .stateIn(
-                        scope = CoroutineScope(Job()),
-                        started = SharingStarted.WhileSubscribed(),
-                        initialValue = NetworkResult.Loading()
-                    )
+                NetworkResult.Success(ApiStocks(stocks))
             )
 
             // when
             viewModel.fetchStocks(StocksButton.SuccessButton)
 
             // Verify
-            val expected = mockStockRepository.getStocks().value.data?.stocks
+            val expected = mockStockRepository.getStocks().data?.stocks
             delay(100)
             val actual = viewModel.stocks.value.data?.stocks
             Assert.assertEquals(expected, actual)
@@ -107,20 +94,14 @@ class MockStocksViewModelTest {
             val viewModel = StocksViewModel(mockStockRepository)
 
             `when`(mockStockRepository.getEmptyStocks()).thenReturn(
-                flow {
-                    emit(NetworkResult.Success(ApiStocks(emptyStock)))
-                }.flowOn(Dispatchers.IO)
-                    .stateIn(
-                        scope = CoroutineScope(Job()),
-                        started = SharingStarted.WhileSubscribed(),
-                        initialValue = NetworkResult.Loading()
-                    )
+                NetworkResult.Success(ApiStocks(emptyStock))
             )
 
             // when
             viewModel.fetchStocks(StocksButton.EmptyButton)
 
             val expected = emptyList<Stock>()
+            delay(100)
             val actual = viewModel.stocks.value.data?.stocks
 
             // Verify
@@ -134,20 +115,13 @@ class MockStocksViewModelTest {
             // Given
             val viewModel = StocksViewModel(mockStockRepository)
             `when`(mockStockRepository.getErrorStocks()).thenReturn(
-                flow {
-                    emit(NetworkResult.Error("something went wrong", null))
-                }.flowOn(Dispatchers.IO)
-                    .stateIn(
-                        scope = CoroutineScope(Job()),
-                        started = SharingStarted.WhileSubscribed(),
-                        initialValue = NetworkResult.Loading()
-                    )
+                NetworkResult.Error("something went wrong", null)
             )
 
             // when
             viewModel.fetchStocks(StocksButton.ErrorButton)
 
-            val expected = FakeStockRepository().getErrorStocks().value.message
+            val expected = FakeStockRepository().getErrorStocks().message
             delay(100)
             val actual = viewModel.stocks.value.message
 

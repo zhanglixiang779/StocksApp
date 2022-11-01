@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.stateIn
 
 class FakeStockRepository : Repository {
 
-    override suspend fun getStocks(): StateFlow<NetworkResult<ApiStocks>> {
+    override suspend fun getStocks(): NetworkResult<ApiStocks> {
         val fakeStocks = listOf(
             Stock(
                 ticker = "TWTR",
@@ -34,36 +34,16 @@ class FakeStockRepository : Repository {
                 current_price_timestamp = 1636657677
             ),
         )
-        return flow {
-            emit(NetworkResult.Success(ApiStocks(fakeStocks)))
-        }.flowOn(Dispatchers.IO)
-            .stateIn(
-                scope = CoroutineScope(Job()),
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = NetworkResult.Loading()
-            )
+
+        return NetworkResult.Success(ApiStocks(fakeStocks))
     }
 
-    override suspend fun getEmptyStocks(): StateFlow<NetworkResult<ApiStocks>> {
+    override suspend fun getEmptyStocks(): NetworkResult<ApiStocks> {
         val emptyStock = emptyList<Stock>()
-        return flow {
-            emit(NetworkResult.Success(ApiStocks(emptyStock)))
-        }.flowOn(Dispatchers.IO)
-            .stateIn(
-                scope = CoroutineScope(Job()),
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = NetworkResult.Loading()
-            )
+        return NetworkResult.Success(ApiStocks(emptyStock))
     }
 
-    override suspend fun getErrorStocks(): StateFlow<NetworkResult<ApiStocks>> {
-        return flow {
-            emit(NetworkResult.Error("something went wrong", null))
-        }.flowOn(Dispatchers.IO)
-            .stateIn(
-                scope = CoroutineScope(Job()),
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = NetworkResult.Loading()
-            )
+    override suspend fun getErrorStocks(): NetworkResult<ApiStocks> {
+        return NetworkResult.Error("something went wrong", null)
     }
 }

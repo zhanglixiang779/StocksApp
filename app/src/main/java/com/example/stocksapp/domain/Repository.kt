@@ -9,15 +9,15 @@ interface Repository {
     /**
      * Calling Success api endpoint
      */
-    suspend fun getStocks(): StateFlow<NetworkResult<ApiStocks>>
+    suspend fun getStocks(): NetworkResult<ApiStocks>
 
     /**
      * Calling Empty stocks api endpoint
      */
-    suspend fun getEmptyStocks(): StateFlow<NetworkResult<ApiStocks>>
+    suspend fun getEmptyStocks(): NetworkResult<ApiStocks>
 
     /**
      * Calling Malformed api endpoint
      */
-    suspend fun getErrorStocks(): StateFlow<NetworkResult<ApiStocks>>
+    suspend fun getErrorStocks(): NetworkResult<ApiStocks>
 }

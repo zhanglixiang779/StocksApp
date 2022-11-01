@@ -40,49 +40,53 @@ class FakeStocksViewModelTest {
 
     @Test
     fun assertTrue_WhenSuccessButton_Clicked() {
-
-        // Given
-        val viewModel = StocksViewModel(fakeStockRepository)
-
-        // when
-        viewModel.fetchStocks(StocksButton.SuccessButton)
-
-        // Verify
         runTest {
-            val expected = FakeStockRepository().getStocks().value.data?.stocks
+            // Given
+            val viewModel = StocksViewModel(fakeStockRepository)
+
+            // when
+            viewModel.fetchStocks(StocksButton.SuccessButton)
+
+            val expected = FakeStockRepository().getStocks().data?.stocks
             delay(100)
             val actual = viewModel.stocks.value.data?.stocks
+
+            // Verify
             assertEquals(expected, actual)
         }
     }
 
     @Test
     fun assertTrue_WhenEmptyButton_Clicked() {
+        runTest {
+            // Given
+            val viewModel = StocksViewModel(fakeStockRepository)
 
-        // Given
-        val viewModel = StocksViewModel(fakeStockRepository)
+            // when
+            viewModel.fetchStocks(StocksButton.EmptyButton)
+            val expected = emptyList<Stock>()
+            delay(100)
+            val actual = viewModel.stocks.value.data?.stocks
 
-        // when
-        viewModel.fetchStocks(StocksButton.EmptyButton)
-        val expected = emptyList<Stock>()
-        val actual = viewModel.stocks.value.data?.stocks
-
-        // Verify
-        assertEquals(expected, actual)
+            // Verify
+            assertEquals(expected, actual)
+        }
     }
 
     @Test
     fun assertTrue_WhenErrorButton_Clicked() {
-
-        // Given
-        val viewModel = StocksViewModel(fakeStockRepository)
-
-        // when
-        viewModel.fetchStocks(StocksButton.ErrorButton)
         runTest {
-            val expected = FakeStockRepository().getErrorStocks().value.message
+            // Given
+            val viewModel = StocksViewModel(fakeStockRepository)
+
+            // when
+            viewModel.fetchStocks(StocksButton.ErrorButton)
+
+            val expected = FakeStockRepository().getErrorStocks().message
             delay(100)
             val actual = viewModel.stocks.value.message
+
+            // Verify
             assertEquals(expected, actual)
         }
     }
